@@ -21,8 +21,7 @@ function App() {
 
   //agregar empleado
   const add = () => {
-    axios
-      .post("http://localhost:3001/create", {
+    axios.post("http://localhost:3001/create", {
         nombre: nombre,
         edad: edad,
         pais: pais,
@@ -37,16 +36,21 @@ function App() {
           html: "<i>El empleado <strong>"+nombre+"</strong> fue registrado con exito</i>",
           icon: "success",
           timer:3000,
+        }).catch(function(error){
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "No se logro eliminar el empleado!",
+            footer: JSON.parse(JSON.stringify(error)).message==='Network Error'?'Intente más tarde':JSON.parse(JSON.stringify(error)).message
+          })
         });
-      })
-      .catch((err) => console.log(err));
-  };
+      });
+  }
 
 
  //actualizar empleado creado anteriormente
   const update = () => {
-    axios
-      .put("http://localhost:3001/update", {
+    axios.put("http://localhost:3001/update", {
         id: id,
         nombre: nombre,
         edad: edad,
@@ -62,33 +66,51 @@ function App() {
           html: "<i>El empleado <strong>"+nombre+"</strong> fue actualizado con exito</i>",
           icon: "success",
           timer:3000,
+        }).catch(function(error){
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "No se logro eliminar el empleado!",
+            footer: JSON.parse(JSON.stringify(error)).message==='Network Error'?'Intente más tarde':JSON.parse(JSON.stringify(error)).message
+          })
         });
-      })
-      .catch((err) => console.log(err));
-  };
+      });
+  }
 
 
   //eliminar empleado
-  const deleteEmpleado = (id) => {
-    axios
-      .delete(`http://localhost:3001/delete/${id}`).then(() => {
+  const deleteEmpleado = (val) => {
+
+    Swal.fire({
+      title: "confirmar eliminación?",
+      html: "<i>Desea Eliminar a <strong>"+val.nombre+"</strong> de los empleados?</i>",
+      icon: "warning",
+      showCancelButton: true,
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Si, eliminarlo!"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios.delete(`http://localhost:3001/delete/${val.id}`).then((res) => {
         getEmpleados();
         limpiarCampos();
         Swal.fire({
-          title: "Quieres eliminar al Empleado?",
-          showDenyButton: true,
-          showCancelButton: true,
-          confirmButtonText: "si, eliminar",
-          denyButtonText: `No`
-        }).then((result) => {
-          if (result.isConfirmed) {
-            Swal.fire("Eliminado!", "", "success");
-          } else if (result.isDenied) {
-            Swal.fire("El empleado no fue eliminado", "", "info");
-          }
+          title: "empleado Eliminado!",
+          html: "<i>El empleado <strong>"+val.nombre+"</strong> fue eliminado con exito</i>",
+          icon: "success",
+          timer:2000,
         });
-      })
-      .catch((err) => console.log(err));
+      }).catch(function(error){
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "No se logro eliminar el empleado!",
+          footer: JSON.parse(JSON.stringify(error)).message==='Network Error'?'Intente más tarde':JSON.parse(JSON.stringify(error)).message
+        })
+      });
+      }
+    });
   };
 
 
@@ -121,8 +143,7 @@ function App() {
 
   //muestra los usuarios creados en base en la tabla 
   const getEmpleados = () => {
-    axios
-      .get("http://localhost:3001/empleados")
+    axios.get("http://localhost:3001/empleados")
       .then((response) => {
         setEmpleados(response.data);
       })
@@ -258,7 +279,7 @@ function App() {
                 className="btn btn-info">Editar</button>
                 <button type="button" 
                 onClick={()=>{
-                  deleteEmpleado(val.id);
+                  deleteEmpleado(val);
                 }}
                 className="btn btn-danger">Eliminar</button>
               </div>
